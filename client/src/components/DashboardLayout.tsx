@@ -15,9 +15,7 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
     <div className="flex min-h-screen bg-navy-50/40">
       <aside className="hidden w-60 shrink-0 border-r border-navy-100 bg-white md:block">
         <div className="px-5 py-5">
-          <p className="font-display text-lg font-bold text-navy-800">
-            Smart<span className="text-amber-500">Rental</span>
-          </p>
+          <img src="/logo.png" alt="SmartRental" className="h-8" />
           <p className="mt-1 text-xs text-navy-400">{heading}</p>
         </div>
         <nav className="flex flex-col gap-1 px-3">

@@ -4,9 +4,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-10 text-sm">
         <div className="flex flex-col justify-between gap-6 md:flex-row">
           <div>
-            <p className="font-display text-lg font-bold text-white">
-              Smart<span className="text-amber-400">Rental</span>
-            </p>
+            <img src="/logo.png" alt="SmartRental" className="h-10" />
             <p className="mt-2 max-w-xs text-navy-200">
               Book reliable vehicles in minutes. Transparent pricing, no paperwork.
             </p>

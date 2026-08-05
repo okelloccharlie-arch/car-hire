@@ -13,10 +13,9 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-navy-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link to="/" className="font-display text-lg font-bold text-navy-800">
-          Smart<span className="text-amber-500">Rental</span>
-        </Link>
-
+        <Link to="/">
+  <img src="/logo.png" alt="SmartRental" className="h-10" />
+      </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-navy-600 md:flex">
           <Link to="/cars" className="hover:text-navy-900">Cars</Link>
           <Link to="/about" className="hover:text-navy-900">About</Link>
