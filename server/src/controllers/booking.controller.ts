@@ -4,6 +4,7 @@ import { prisma } from "../config/db";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { AuthRequest } from "../types";
+import { sendBookingApprovedEmail, sendBookingCancelledEmail } from "../utils/email";
 
 const bookingSchema = z.object({
   carId: z.string().uuid(),
@@ -71,7 +72,10 @@ export const createBooking = asyncHandler(async (req: AuthRequest, res: Response
 export const updateBooking = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { status } = statusSchema.parse(req.body);
 
-  const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+  const booking = await prisma.booking.findUnique({
+    where: { id: req.params.id },
+    include: { car: true, user: true },
+  });
   if (!booking) throw new ApiError(404, "Booking not found");
 
   const isOwner = booking.userId === req.user?.userId;
@@ -95,8 +99,32 @@ export const updateBooking = asyncHandler(async (req: AuthRequest, res: Response
     await prisma.car.update({ where: { id: booking.carId }, data: { status: "AVAILABLE" } });
   }
 
+  // Send a notification email — never let an email failure block the status update.
+  try {
+    if (status === "APPROVED") {
+      await sendBookingApprovedEmail({
+        to: booking.user.email,
+        firstName: booking.user.firstName,
+        carBrand: booking.car.brand,
+        carModel: booking.car.model,
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+      });
+    }
+    if (status === "CANCELLED") {
+      await sendBookingCancelledEmail({
+        to: booking.user.email,
+        firstName: booking.user.firstName,
+        carBrand: booking.car.brand,
+        carModel: booking.car.model,
+      });
+    }
+  } catch (emailError) {
+    console.error("Failed to send booking status email:", emailError);
+  }
+
   res.json({ success: true, data: updated });
-});
+}); 
 
 // DELETE /api/bookings/:id (admin only)
 export const deleteBooking = asyncHandler(async (req: AuthRequest, res: Response) => {
