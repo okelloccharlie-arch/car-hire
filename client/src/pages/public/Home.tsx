@@ -1,49 +1,159 @@
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import * as carService from "../../services/carService";
 import CarCard from "../../components/CarCard";
 
+function useCountUp(target: number) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            let current = 0;
+            const step = Math.max(1, Math.ceil(target / 40));
+            const tick = () => {
+              current += step;
+              if (current >= target) {
+                setValue(target);
+                return;
+              }
+              setValue(current);
+              requestAnimationFrame(tick);
+            };
+            tick();
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return { value, ref };
+}
+
 export default function Home() {
+  const stats = [
+    { label: "Cars listed", target: 48 },
+    { label: "Cities covered", target: 6 },
+    { label: "Min. avg approval", target: 15 },
+    { label: "Trips completed", target: 900 },
+  ];
+
   const { data: cars, isLoading } = useQuery({
-    queryKey: ["cars", "featured"],
-    queryFn: () => carService.getCars({ status: "AVAILABLE" }),
+    queryKey: ["cars", "home-featured"],
+    queryFn: () => carService.getCars({}),
   });
 
+  const featuredCars = cars?.slice(0, 3) ?? [];
+
   return (
-    <div>
-      <section className="bg-navy-900 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-20">
-          <p className="text-sm font-semibold uppercase tracking-wide text-amber-400">
-            Rentals, without the front-desk queue
-          </p>
-          <h1 className="mt-3 max-w-xl font-display text-4xl font-extrabold leading-tight md:text-5xl">
-            Book the right car in minutes, not phone calls.
-          </h1>
-          <p className="mt-4 max-w-lg text-navy-200">
-            Browse live availability, compare vehicles, and reserve online — no paperwork, no double bookings.
-          </p>
-          <div className="mt-8 flex gap-3">
-            <Link to="/cars" className="btn-primary">Browse cars</Link>
-            <Link to="/register" className="btn-secondary bg-transparent text-white hover:bg-white/10 border-white/30">
-              Create an account
-            </Link>
+    <div className="bg-concrete text-ink font-body">
+      {/* Hero */}
+      <header className="relative bg-ink text-concrete overflow-hidden pt-16">
+        <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center pb-14 md:pb-20 relative">
+          <div>
+            <div className="inline-flex items-center gap-2 font-mono text-xs tracking-widest text-lane mb-4">
+              <span className="w-2 h-2 rounded-full bg-lane inline-block" />
+              RENTALS, WITHOUT THE FRONT-DESK QUEUE
+            </div>
+            <h1 className="font-display uppercase font-bold text-4xl md:text-5xl leading-tight mb-4">
+              Book the right car <span className="text-orange">in minutes,</span><br />not phone calls.
+            </h1>
+            <p className="text-[#C7CBD1] max-w-md mb-7 leading-relaxed">
+              Browse live availability, compare vehicles, and reserve online — no paperwork, no double bookings.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a href="#cars" className="px-5 py-3 rounded-md bg-orange text-white font-semibold text-sm hover:bg-orange-dim transition">
+                Browse cars
+              </a>
+              <Link to="/register" className="px-5 py-3 rounded-md border-2 border-white/40 font-semibold text-sm hover:border-white transition">
+                Create an account
+              </Link>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-asphalt to-ink border border-white/10 min-h-[240px] flex items-end p-5">
+            <div className="bg-concrete text-ink rounded-lg px-4 py-3.5 shadow-2xl">
+              <div className="font-display font-semibold text-sm">Toyota Land Cruiser Prado</div>
+              <div className="font-mono font-bold text-xl text-orange-dim">
+                KSh 15,000 <span className="text-xs text-gray-500 font-medium">/ day</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="border-t-4 border-dashed border-lane" />
+
+      {/* Stats */}
+      <div className="bg-asphalt text-concrete">
+        <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 py-8">
+          {stats.map((s) => {
+            const { value, ref } = useCountUp(s.target);
+            return (
+              <div key={s.label} ref={ref}>
+                <div className="font-mono font-bold text-3xl text-lane">{value}</div>
+                <div className="text-xs uppercase tracking-wider text-gray-400 mt-1">{s.label}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Available cars — now using REAL data + real photos */}
+      <section id="cars" className="py-14 md:py-20">
+        <div className="max-w-[1180px] mx-auto px-6">
+          <div className="flex items-baseline justify-between flex-wrap gap-2.5 mb-7">
+            <h2 className="font-display uppercase text-2xl font-semibold">Available now</h2>
+            <Link to="/cars" className="text-orange-dim font-semibold text-sm">View all →</Link>
+          </div>
+
+          {isLoading && <p className="text-gray-500">Loading cars…</p>}
+
+          {!isLoading && featuredCars.length === 0 && (
+            <p className="text-gray-500">No cars available right now — check back soon.</p>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {featuredCars.map((car) => (
+              <CarCard key={car.id} car={car} />
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="flex items-end justify-between">
-          <h2 className="text-2xl font-bold text-navy-900">Available now</h2>
-          <Link to="/cars" className="text-sm font-medium text-amber-600 hover:text-amber-700">
-            View all →
-          </Link>
-        </div>
-        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {isLoading && <p className="text-navy-500">Loading cars…</p>}
-          {cars?.slice(0, 4).map((car) => (
-            <CarCard key={car.id} car={car} />
-          ))}
-          {cars?.length === 0 && <p className="text-navy-500">No cars available right now.</p>}
+      <div className="border-t-4 border-dashed border-lane max-w-[1180px] mx-auto" />
+
+      {/* How it works */}
+      <section id="how" className="py-14 md:py-20">
+        <div className="max-w-[1180px] mx-auto px-6">
+          <h2 className="font-display uppercase text-2xl font-semibold mb-7">How it works</h2>
+          <div>
+            {[
+              { n: "01", t: "Browse", d: "Filter by dates, transmission, and budget to see only cars that are actually free when you need them." },
+              { n: "02", t: "Book", d: "Reserve online in minutes. No calls, no back-and-forth — you get a confirmation the moment an admin approves it." },
+              { n: "03", t: "Drive", d: "Pick up your car at the agreed time and go. Return it, and you're free to book your next trip." },
+            ].map((step, i, arr) => (
+              <div
+                key={step.n}
+                className={`flex gap-4 py-5 border-t border-concrete-dim ${i === arr.length - 1 ? "border-b" : ""}`}
+              >
+                <div className="font-mono font-bold text-sm text-orange-dim min-w-[28px]">{step.n}</div>
+                <div>
+                  <h3 className="font-semibold text-base mb-1.5">{step.t}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-md">{step.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
