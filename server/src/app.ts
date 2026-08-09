@@ -12,16 +12,13 @@ import { notFound, errorHandler } from "./middleware/error.middleware";
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "http://localhost:5173",
-].filter(Boolean);
+const allowedOrigins = [process.env.CLIENT_URL].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like Postman, curl, mobile apps)
-      if (!origin || allowedOrigins.includes(origin)) {
+      const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin);
+      if (!origin || isLocalhost || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -30,6 +27,8 @@ app.use(
     credentials: true,
   })
 );
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
