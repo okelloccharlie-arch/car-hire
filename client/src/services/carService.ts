@@ -22,16 +22,12 @@ export async function getCarById(id: string) {
 }
 
 export async function createCar(payload: FormData) {
-  const { data } = await api.post<{ data: Car }>("/cars", payload, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post<{ data: Car }>("/cars", payload);
   return data.data;
 }
 
 export async function updateCar(id: string, payload: FormData) {
-  const { data } = await api.put<{ data: Car }>(`/cars/${id}`, payload, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.put<{ data: Car }>(`/cars/${id}`, payload);
   return data.data;
 }
 
