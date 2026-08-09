@@ -67,7 +67,7 @@ export default function CarDetails() {
             {car.transmission} · {car.fuelType} · {car.seats} seats
           </p>
           <p className="mt-4 font-display text-3xl font-bold text-navy-900">
-            ${Number(car.pricePerDay).toFixed(0)}
+            KSh {Number(car.pricePerDay).toFixed(0)}
             <span className="text-base font-normal text-navy-500"> / day</span>
           </p>
 
@@ -94,7 +94,7 @@ export default function CarDetails() {
             </div>
             {days > 0 && (
               <p className="text-sm text-navy-600">
-                {days} day{days > 1 ? "s" : ""} · Total: <span className="font-semibold">${total.toFixed(0)}</span>
+                {days} day{days > 1 ? "s" : ""} · Total: <span className="font-semibold">KSh {total.toFixed(0)}</span>
               </p>
             )}
             {error && <p className="text-sm text-rose-600">{error}</p>}

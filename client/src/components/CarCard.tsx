@@ -30,7 +30,7 @@ export default function CarCard({ car }: { car: Car }) {
           {car.year} · {car.transmission} · {car.fuelType} · {car.seats} seats
         </p>
         <p className="mt-3 font-display text-lg font-bold text-navy-900">
-          ${Number(car.pricePerDay).toFixed(0)}
+          KSh {Number(car.pricePerDay).toFixed(0)}
           <span className="text-sm font-normal text-navy-500"> / day</span>
         </p>
       </div>

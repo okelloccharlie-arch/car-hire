@@ -119,7 +119,7 @@ export default function AdminCars() {
                 <td className="py-3 font-medium text-navy-900">
                   {car.brand} {car.model} ({car.year})
                 </td>
-                <td className="py-3">${Number(car.pricePerDay).toFixed(0)}</td>
+                <td className="py-3">KSh {Number(car.pricePerDay).toFixed(0)}</td>
                 <td className="py-3">{car.status}</td>
                 <td className="py-3 text-right">
                   <button
