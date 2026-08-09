@@ -42,10 +42,10 @@ function useCountUp(target: number) {
 
 export default function Home() {
   const stats = [
-    { label: "Cars listed", target: 48 },
-    { label: "Cities covered", target: 6 },
+    { label: "Cars listed", target: 105 },
+    { label: "Towms covered", target: 70 },
     { label: "Min. avg approval", target: 15 },
-    { label: "Trips completed", target: 900 },
+    { label: "Trips completed", target: 950 },
   ];
 
   const { data: cars, isLoading } = useQuery({
@@ -54,6 +54,7 @@ export default function Home() {
   });
 
   const featuredCars = cars?.slice(0, 3) ?? [];
+  const heroCar = cars?.find((c) => c.model.toLowerCase().includes("land cruiser")) ?? cars?.[0];
 
   return (
     <div className="bg-concrete text-ink font-body">
@@ -66,7 +67,7 @@ export default function Home() {
               RENTALS, WITHOUT THE FRONT-DESK QUEUE
             </div>
             <h1 className="font-display uppercase font-bold text-4xl md:text-5xl leading-tight mb-4">
-              Book the right car <span className="text-orange">in minutes,</span><br />not phone calls.
+              Book the right car <span className="text-orange">in minutes,</span><br />no phone calls.
             </h1>
             <p className="text-[#C7CBD1] max-w-md mb-7 leading-relaxed">
               Browse live availability, compare vehicles, and reserve online — no paperwork, no double bookings.
@@ -80,14 +81,25 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-asphalt to-ink border border-white/10 min-h-[240px] flex items-end p-5">
-            <div className="bg-concrete text-ink rounded-lg px-4 py-3.5 shadow-2xl">
-              <div className="font-display font-semibold text-sm">Toyota Land Cruiser Prado</div>
-              <div className="font-mono font-bold text-xl text-orange-dim">
-                KSh 15,000 <span className="text-xs text-gray-500 font-medium">/ day</span>
-              </div>
-            </div>
-          </div>
+          <div
+  className="relative rounded-2xl overflow-hidden border border-white/10 min-h-[240px] flex items-end p-5 bg-cover bg-center"
+  style={{
+    backgroundImage: heroCar?.image
+      ? `linear-gradient(to top, rgba(20,23,28,0.85), rgba(20,23,28,0.1)), url(${heroCar.image})`
+      : undefined,
+    backgroundColor: !heroCar?.image ? "#1F232A" : undefined,
+  }}
+>
+  <div className="bg-concrete text-ink rounded-lg px-4 py-3.5 shadow-2xl">
+    <div className="font-display font-semibold text-sm">
+      {heroCar ? `${heroCar.brand} ${heroCar.model}` : "Toyota Land Cruiser Prado"}
+    </div>
+    <div className="font-mono font-bold text-xl text-orange-dim">
+      KSh {heroCar ? Number(heroCar.pricePerDay).toFixed(0) : "15,000"}{" "}
+      <span className="text-xs text-gray-500 font-medium">/ day</span>
+    </div>
+  </div>
+</div>
         </div>
       </header>
 
