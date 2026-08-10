@@ -31,20 +31,7 @@ enum PaymentStatus {
   FAILED
 }
 
-model User {
-  id        String    @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String    @unique
-  phone     String?
-  password  String
-  role      Role      @default(CUSTOMER)
-  bookings  Booking[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
 
-  @@map("users")
-}
 
 model Car {
   id           String    @id @default(uuid())
@@ -91,4 +78,20 @@ model Payment {
   createdAt     DateTime      @default(now())
 
   @@map("payments")
+}
+model User {
+  id                String    @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String    @unique
+  phone             String?
+  password          String
+  role              Role      @default(CUSTOMER)
+  bookings          Booking[]
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("users")
 }

@@ -45,3 +45,17 @@ export async function sendBookingCancelledEmail(params: {
     `,
   });
 }
+export async function sendPasswordResetEmail(params: { to: string; firstName: string; resetUrl: string }) {
+  const { to, firstName, resetUrl } = params;
+  await resend.emails.send({
+    from: "Car Hire <onboarding@resend.dev>",
+    to,
+    subject: "Reset your password",
+    html: `
+      <p>Hi ${firstName},</p>
+      <p>Click the link below to reset your password. This link expires in 30 minutes.</p>
+      <p><a href="${resetUrl}">${resetUrl}</a></p>
+      <p>If you didn't request this, you can safely ignore this email.</p>
+    `,
+  });
+}

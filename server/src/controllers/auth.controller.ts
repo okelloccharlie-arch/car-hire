@@ -5,6 +5,8 @@ import { prisma } from "../config/db";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { signToken } from "../utils/jwt";
+import crypto from "crypto";
+import { sendPasswordResetEmail } from "../utils/email";
 
 const registerSchema = z.object({
   firstName: z.string().min(1),
@@ -17,6 +19,14 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+});
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8),
 });
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
@@ -66,4 +76,51 @@ export const logout = asyncHandler(async (_req: Request, res: Response) => {
   // JWTs are stateless; the client discards the token. This endpoint exists
   // for symmetry and as a hook for future token-blacklisting if needed.
   res.json({ success: true, message: "Logged out successfully" });
+});
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = forgotPasswordSchema.parse(req.body);
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // Always respond the same way whether or not the account exists,
+  // so we don't reveal which emails are registered.
+  if (!user) {
+    return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const expiry = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { resetToken: hashedToken, resetTokenExpiry: expiry },
+  });
+
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}`;
+
+  await sendPasswordResetEmail({ to: user.email, firstName: user.firstName, resetUrl });
+
+  res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token, newPassword } = resetPasswordSchema.parse(req.body);
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await prisma.user.findFirst({
+    where: { resetToken: hashedToken, resetTokenExpiry: { gt: new Date() } },
+  });
+
+  if (!user) throw new ApiError(400, "Invalid or expired reset link");
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
+  });
+
+  res.json({ success: true, message: "Password reset successful" });
 });
