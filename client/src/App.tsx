@@ -11,6 +11,8 @@ import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
 import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
+import ForgotPassword from "./pages/public/ForgotPassword";
+import ResetPassword from "./pages/public/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
@@ -47,6 +49,8 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
       {/* Customer area */}

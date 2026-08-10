@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import PasswordInput from "../../components/PasswordInput";
 
 export default function Login() {
   const { login } = useAuth();
@@ -36,8 +37,18 @@ export default function Login() {
         </label>
         <label className="block text-sm">
           Password
-          <input type="password" className="input mt-1" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <PasswordInput
+            className="input mt-1"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </label>
+        <div className="flex justify-end">
+          <Link to="/forgot-password" className="text-sm font-medium text-amber-600 hover:text-amber-700">
+            Forgot password?
+          </Link>
+        </div>
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
           {loading ? "Logging in…" : "Log in"}
