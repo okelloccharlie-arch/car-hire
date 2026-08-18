@@ -33,7 +33,11 @@ export default function CarDetails() {
       return;
     }
     if (!startDate || !endDate) {
-      setError("Please choose both a start and end date");
+      setError("Please choose both a pickup and return date & time");
+      return;
+    }
+    if (new Date(endDate) <= new Date(startDate)) {
+      setError("Return time must be after pickup time");
       return;
     }
     bookingMutation.mutate();
@@ -74,18 +78,18 @@ export default function CarDetails() {
           <form onSubmit={handleBook} className="card mt-6 space-y-3 p-4">
             <div className="grid grid-cols-2 gap-3">
               <label className="text-sm">
-                Start date
+                Pickup date & time
                 <input
-                  type="date"
+                  type="datetime-local"
                   className="input mt-1"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </label>
               <label className="text-sm">
-                End date
+                Return date & time
                 <input
-                  type="date"
+                  type="datetime-local"
                   className="input mt-1"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
