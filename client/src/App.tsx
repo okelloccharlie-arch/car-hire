@@ -23,6 +23,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCars from "./pages/admin/AdminCars";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBookings from "./pages/admin/AdminBookings";
+import Packages from "./pages/public/Packages";
+import Services from "./pages/public/Services";
+import FAQ from "./pages/public/FAQ";
+import Blog from "./pages/public/Blog";
 
 const customerNav = [
   { to: "/dashboard", label: "Overview" },
@@ -51,6 +55,10 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/packages" element={<Packages />} />
+<Route path="/services" element={<Services />} />
+<Route path="/faq" element={<FAQ />} />
+<Route path="/blog" element={<Blog />} />
       </Route>
 
       {/* Customer area */}
