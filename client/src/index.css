@@ -24,4 +24,8 @@
   .card {
     @apply rounded-lg border border-navy-100 bg-white shadow-sm;
   }
+  @keyframes splash-dot-fade {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 1; }
+}
 }

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import PublicLayout from "./components/PublicLayout";
 import DashboardLayout from "./components/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SplashScreen from "./components/SplashScreen";
 
 import Home from "./pages/public/Home";
 import Cars from "./pages/public/Cars";
@@ -13,6 +15,10 @@ import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import ForgotPassword from "./pages/public/ForgotPassword";
 import ResetPassword from "./pages/public/ResetPassword";
+import Packages from "./pages/public/Packages";
+import Services from "./pages/public/Services";
+import FAQ from "./pages/public/FAQ";
+import Blog from "./pages/public/Blog";
 import NotFound from "./pages/NotFound";
 
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
@@ -23,10 +29,6 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCars from "./pages/admin/AdminCars";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBookings from "./pages/admin/AdminBookings";
-import Packages from "./pages/public/Packages";
-import Services from "./pages/public/Services";
-import FAQ from "./pages/public/FAQ";
-import Blog from "./pages/public/Blog";
 
 const customerNav = [
   { to: "/dashboard", label: "Overview" },
@@ -42,45 +44,50 @@ const adminNav = [
 ];
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <Routes>
-      {/* Public site */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/cars" element={<Cars />} />
-        <Route path="/cars/:id" element={<CarDetails />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/packages" element={<Packages />} />
-<Route path="/services" element={<Services />} />
-<Route path="/faq" element={<FAQ />} />
-<Route path="/blog" element={<Blog />} />
-      </Route>
-
-      {/* Customer area */}
-      <Route element={<ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]} />}>
-        <Route element={<DashboardLayout items={customerNav} heading="Customer area" />}>
-          <Route path="/dashboard" element={<CustomerDashboard />} />
-          <Route path="/dashboard/bookings" element={<CustomerBookings />} />
-          <Route path="/dashboard/profile" element={<CustomerProfile />} />
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      <Routes>
+        {/* Public site */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/cars" element={<Cars />} />
+          <Route path="/cars/:id" element={<CarDetails />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/packages" element={<Packages />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/blog" element={<Blog />} />
         </Route>
-      </Route>
 
-      {/* Admin area */}
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-        <Route element={<DashboardLayout items={adminNav} heading="Admin area" />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/cars" element={<AdminCars />} />
-          <Route path="/admin/customers" element={<AdminCustomers />} />
-          <Route path="/admin/bookings" element={<AdminBookings />} />
+        {/* Customer area */}
+        <Route element={<ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]} />}>
+          <Route element={<DashboardLayout items={customerNav} heading="Customer area" />}>
+            <Route path="/dashboard" element={<CustomerDashboard />} />
+            <Route path="/dashboard/bookings" element={<CustomerBookings />} />
+            <Route path="/dashboard/profile" element={<CustomerProfile />} />
+          </Route>
         </Route>
-      </Route>
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Admin area */}
+        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          <Route element={<DashboardLayout items={adminNav} heading="Admin area" />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/cars" element={<AdminCars />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+          </Route>
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
