@@ -26,6 +26,7 @@ export interface Car {
 }
 
 export type BookingStatus = "PENDING" | "APPROVED" | "CANCELLED" | "COMPLETED";
+export type DriveType = "SELF_DRIVE" | "CHAUFFEUR";
 
 export interface Booking {
   id: string;
@@ -34,6 +35,7 @@ export interface Booking {
   car: Car;
   startDate: string;
   endDate: string;
+  driveType: DriveType;
   totalPrice: number;
   status: BookingStatus;
 }

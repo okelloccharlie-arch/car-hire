@@ -1,12 +1,17 @@
 import api from "./api";
-import { Booking, BookingStatus } from "../types";
+import { Booking, BookingStatus, DriveType } from "../types";
 
 export async function getBookings() {
   const { data } = await api.get<{ data: Booking[] }>("/bookings");
   return data.data;
 }
 
-export async function createBooking(payload: { carId: string; startDate: string; endDate: string }) {
+export async function createBooking(payload: {
+  carId: string;
+  startDate: string;
+  endDate: string;
+  driveType: DriveType;
+}) {
   const { data } = await api.post<{ data: Booking }>("/bookings", payload);
   return data.data;
 }

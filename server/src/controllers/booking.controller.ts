@@ -6,10 +6,13 @@ import { ApiError } from "../utils/ApiError";
 import { AuthRequest } from "../types";
 import { sendBookingApprovedEmail, sendBookingCancelledEmail } from "../utils/email";
 
+const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh
+
 const bookingSchema = z.object({
   carId: z.string().uuid(),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
+  driveType: z.enum(["SELF_DRIVE", "CHAUFFEUR"]).optional().default("SELF_DRIVE"),
 });
 
 const statusSchema = z.object({
@@ -40,7 +43,6 @@ export const createBooking = asyncHandler(async (req: AuthRequest, res: Response
   if (!car) throw new ApiError(404, "Car not found");
   if (car.status !== "AVAILABLE") throw new ApiError(400, "Car is not available for booking");
 
-  // Prevent double bookings: reject if an overlapping, non-cancelled booking exists.
   const overlapping = await prisma.booking.findFirst({
     where: {
       carId: data.carId,
@@ -52,7 +54,9 @@ export const createBooking = asyncHandler(async (req: AuthRequest, res: Response
   if (overlapping) throw new ApiError(409, "Car is already booked for the selected dates");
 
   const days = Math.ceil((data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const totalPrice = Number(car.pricePerDay) * days;
+  const baseTotal = Number(car.pricePerDay) * days;
+  const chauffeurFee = data.driveType === "CHAUFFEUR" ? CHAUFFEUR_FEE_PER_DAY * days : 0;
+  const totalPrice = baseTotal + chauffeurFee;
 
   const booking = await prisma.booking.create({
     data: {
@@ -60,6 +64,7 @@ export const createBooking = asyncHandler(async (req: AuthRequest, res: Response
       carId: data.carId,
       startDate: data.startDate,
       endDate: data.endDate,
+      driveType: data.driveType,
       totalPrice,
     },
     include: { car: true },
@@ -91,7 +96,6 @@ export const updateBooking = asyncHandler(async (req: AuthRequest, res: Response
     include: { car: true },
   });
 
-  // Reflect approved rentals on the car's availability.
   if (status === "APPROVED") {
     await prisma.car.update({ where: { id: booking.carId }, data: { status: "RENTED" } });
   }
@@ -99,7 +103,6 @@ export const updateBooking = asyncHandler(async (req: AuthRequest, res: Response
     await prisma.car.update({ where: { id: booking.carId }, data: { status: "AVAILABLE" } });
   }
 
-  // Send a notification email — never let an email failure block the status update.
   try {
     if (status === "APPROVED") {
       await sendBookingApprovedEmail({
@@ -124,7 +127,7 @@ export const updateBooking = asyncHandler(async (req: AuthRequest, res: Response
   }
 
   res.json({ success: true, data: updated });
-}); 
+});
 
 // DELETE /api/bookings/:id (admin only)
 export const deleteBooking = asyncHandler(async (req: AuthRequest, res: Response) => {

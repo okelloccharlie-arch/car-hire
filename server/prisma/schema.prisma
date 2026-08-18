@@ -24,6 +24,10 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
 }
+enum DriveType {
+  SELF_DRIVE
+  CHAUFFEUR
+}
 
 enum PaymentStatus {
   PAID
@@ -53,13 +57,14 @@ model Car {
 }
 
 model Booking {
-  id         String        @id @default(uuid())
+   id         String        @id @default(uuid())
   userId     String
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   carId      String
   car        Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
   startDate  DateTime
   endDate    DateTime
+  driveType  DriveType     @default(SELF_DRIVE)
   totalPrice Decimal       @db.Decimal(10, 2)
   status     BookingStatus @default(PENDING)
   payment    Payment?
