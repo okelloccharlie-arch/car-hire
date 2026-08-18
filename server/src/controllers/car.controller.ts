@@ -67,7 +67,13 @@ export const createCar = asyncHandler(async (req: AuthRequest, res: Response) =>
     imageUrl = uploadResult.secure_url;
   }
 
-  const car = await prisma.car.create({ data: { ...data, image: imageUrl } });
+  const car = await prisma.car.create({
+    data: {
+      ...data,
+      image: imageUrl,
+      rentedAt: data.status === "RENTED" ? new Date() : null,
+    },
+  });
   res.status(201).json({ success: true, data: car });
 });
 
@@ -89,7 +95,11 @@ export const updateCar = asyncHandler(async (req: AuthRequest, res: Response) =>
 
   const car = await prisma.car.update({
     where: { id: req.params.id },
-    data: { ...data, ...(imageUrl ? { image: imageUrl } : {}) },
+    data: {
+      ...data,
+      ...(imageUrl ? { image: imageUrl } : {}),
+      ...(data.status ? { rentedAt: data.status === "RENTED" ? new Date() : null } : {}),
+    },
   });
   res.json({ success: true, data: car });
 });

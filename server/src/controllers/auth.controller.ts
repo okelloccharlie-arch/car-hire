@@ -12,7 +12,7 @@ const registerSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
-  phone: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required"),
   password: z.string().min(8),
 });
 
@@ -20,6 +20,7 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
@@ -73,24 +74,21 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (_req: Request, res: Response) => {
-  // JWTs are stateless; the client discards the token. This endpoint exists
-  // for symmetry and as a hook for future token-blacklisting if needed.
   res.json({ success: true, message: "Logged out successfully" });
 });
+
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email } = forgotPasswordSchema.parse(req.body);
 
   const user = await prisma.user.findUnique({ where: { email } });
 
-  // Always respond the same way whether or not the account exists,
-  // so we don't reveal which emails are registered.
   if (!user) {
     return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
   }
 
   const rawToken = crypto.randomBytes(32).toString("hex");
   const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-  const expiry = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+  const expiry = new Date(Date.now() + 1000 * 60 * 30);
 
   await prisma.user.update({
     where: { id: user.id },

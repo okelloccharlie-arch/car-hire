@@ -34,7 +34,7 @@ enum PaymentStatus {
 
 
 model Car {
-  id           String    @id @default(uuid())
+   id           String    @id @default(uuid())
   brand        String
   model        String
   year         Int
@@ -44,6 +44,7 @@ model Car {
   seats        Int
   image        String?
   status       CarStatus @default(AVAILABLE)
+  rentedAt     DateTime?
   bookings     Booking[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
