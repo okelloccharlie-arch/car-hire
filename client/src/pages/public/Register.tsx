@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import PasswordInput from "../../components/PasswordInput";
 
 export default function Register() {
   const { register } = useAuth();
@@ -48,12 +49,18 @@ export default function Register() {
           <input type="email" className="input mt-1" value={form.email} onChange={update("email")} required />
         </label>
         <label className="block text-sm">
-          Phone (optional)
-          <input className="input mt-1" value={form.phone} onChange={update("phone")} />
+          Phone
+          <input className="input mt-1" value={form.phone} onChange={update("phone")} required />
         </label>
         <label className="block text-sm">
-          Password
-          <input type="password" className="input mt-1" value={form.password} onChange={update("password")} minLength={8} required />
+          Create your password
+          <PasswordInput
+            className="input mt-1"
+            value={form.password}
+            onChange={update("password")}
+            minLength={8}
+            required
+          />
         </label>
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>

@@ -105,13 +105,14 @@ export default function AdminCars() {
               <th className="py-2">Car</th>
               <th className="py-2">Price/day</th>
               <th className="py-2">Status</th>
+              <th className="py-2">Rented since</th>
               <th className="py-2"></th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td className="py-3 text-navy-500" colSpan={4}>Loading…</td>
+                <td className="py-3 text-navy-500" colSpan={5}>Loading…</td>
               </tr>
             )}
             {cars?.map((car) => (
@@ -121,6 +122,9 @@ export default function AdminCars() {
                 </td>
                 <td className="py-3">KSh {Number(car.pricePerDay).toFixed(0)}</td>
                 <td className="py-3">{car.status}</td>
+                <td className="py-3 text-navy-500">
+                  {car.rentedAt ? new Date(car.rentedAt).toLocaleString() : "—"}
+                </td>
                 <td className="py-3 text-right">
                   <button
                     className="text-rose-600 hover:text-rose-700"

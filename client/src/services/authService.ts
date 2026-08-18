@@ -25,3 +25,12 @@ export async function register(payload: {
 export async function logout() {
   await api.post("/auth/logout");
 }
+export async function forgotPassword(email: string) {
+  const { data } = await api.post<{ success: boolean; message: string }>("/auth/forgot-password", { email });
+  return data;
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const { data } = await api.post<{ success: boolean; message: string }>("/auth/reset-password", { token, newPassword });
+  return data;
+}

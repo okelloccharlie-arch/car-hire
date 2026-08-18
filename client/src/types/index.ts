@@ -22,6 +22,7 @@ export interface Car {
   seats: number;
   image?: string;
   status: CarStatus;
+  rentedAt?: string | null;
 }
 
 export type BookingStatus = "PENDING" | "APPROVED" | "CANCELLED" | "COMPLETED";
