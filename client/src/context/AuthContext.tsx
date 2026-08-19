@@ -5,7 +5,7 @@ import * as authService from "../services/authService";
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, remember?: boolean) => Promise<void>;
   register: (payload: {
     firstName: string;
     lastName: string;
@@ -18,22 +18,31 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+function readStoredUser(): User | null {
+  const stored = localStorage.getItem("user") || sessionStorage.getItem("user");
+  return stored ? JSON.parse(stored) : null;
+}
 
-  const persist = useCallback((token: string, user: User) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => readStoredUser());
+
+  const persist = useCallback((token: string, user: User, remember: boolean) => {
+    // Clear both storages first so we never end up with stale duplicate data.
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem("token", token);
+    storage.setItem("user", JSON.stringify(user));
     setUser(user);
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, remember = true) => {
       const { token, user } = await authService.login(email, password);
-      persist(token, user);
+      persist(token, user, remember);
     },
     [persist]
   );
@@ -41,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (payload: { firstName: string; lastName: string; email: string; phone?: string; password: string }) => {
       const { token, user } = await authService.register(payload);
-      persist(token, user);
+      persist(token, user, true);
     },
     [persist]
   );
@@ -49,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     setUser(null);
   }, []);
 

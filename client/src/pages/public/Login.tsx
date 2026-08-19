@@ -8,6 +8,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +17,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, remember);
       navigate("/");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Login failed");
@@ -44,11 +45,22 @@ export default function Login() {
             required
           />
         </label>
-        <div className="flex justify-end">
+
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 text-sm text-navy-600">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4 rounded border-navy-300 text-amber-600 focus:ring-amber-500"
+            />
+            Remember me
+          </label>
           <Link to="/forgot-password" className="text-sm font-medium text-amber-600 hover:text-amber-700">
             Forgot password?
           </Link>
         </div>
+
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
           {loading ? "Logging in…" : "Log in"}

@@ -1,6 +1,6 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { usePendingBookingsCount } from "../hooks/usePendingBookingsCount";
 
 interface NavItem {
   to: string;
@@ -10,6 +10,7 @@ interface NavItem {
 export default function DashboardLayout({ items, heading }: { items: NavItem[]; heading: string }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const pendingCount = usePendingBookingsCount();
 
   return (
     <div className="flex min-h-screen bg-navy-50/40">
@@ -25,12 +26,17 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
               to={item.to}
               end
               className={({ isActive }) =>
-                `rounded-md px-3 py-2 text-sm font-medium transition ${
+                `flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
                   isActive ? "bg-amber-50 text-amber-700" : "text-navy-600 hover:bg-navy-50"
                 }`
               }
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.to === "/admin/bookings" && pendingCount > 0 && (
+                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white">
+                  {pendingCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
