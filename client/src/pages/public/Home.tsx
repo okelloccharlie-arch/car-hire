@@ -40,12 +40,45 @@ function useCountUp(target: number) {
   return { value, ref };
 }
 
+const HERO_LINE1 = "Book the right car ";
+const HERO_HIGHLIGHT = "in minutes,";
+const HERO_LINE2 = "no phone calls.";
+const HERO_FULL_TEXT = HERO_LINE1 + HERO_HIGHLIGHT + HERO_LINE2;
+
+function useTypewriter(fullText: string, speed = 40, startDelay = 300) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    setCount(0);
+    let i = 0;
+    let stepTimeout: ReturnType<typeof setTimeout>;
+
+    const startTimeout = setTimeout(() => {
+      const tick = () => {
+        i++;
+        setCount(i);
+        if (i < fullText.length) {
+          stepTimeout = setTimeout(tick, speed);
+        }
+      };
+      tick();
+    }, startDelay);
+
+    return () => {
+      clearTimeout(startTimeout);
+      clearTimeout(stepTimeout);
+    };
+  }, [fullText, speed, startDelay]);
+
+  return count;
+}
+
 export default function Home() {
   const stats = [
-    { label: "Cars listed", target: 105 },
-    { label: "Towms covered", target: 70 },
+    { label: "Cars listed", target: 48 },
+    { label: "Cities covered", target: 6 },
     { label: "Min. avg approval", target: 15 },
-    { label: "Trips completed", target: 950 },
+    { label: "Trips completed", target: 900 },
   ];
 
   const { data: cars, isLoading } = useQuery({
@@ -55,6 +88,16 @@ export default function Home() {
 
   const featuredCars = cars?.slice(0, 3) ?? [];
   const heroCar = cars?.find((c) => c.model.toLowerCase().includes("land cruiser")) ?? cars?.[0];
+
+  const typedCount = useTypewriter(HERO_FULL_TEXT, 40, 300);
+  const line1Shown = HERO_LINE1.slice(0, Math.min(typedCount, HERO_LINE1.length));
+  const highlightShown = HERO_HIGHLIGHT.slice(
+    0,
+    Math.max(0, Math.min(typedCount - HERO_LINE1.length, HERO_HIGHLIGHT.length))
+  );
+  const line2Shown = HERO_LINE2.slice(0, Math.max(0, typedCount - HERO_LINE1.length - HERO_HIGHLIGHT.length));
+  const highlightDone = highlightShown.length === HERO_HIGHLIGHT.length;
+  const isTyping = typedCount < HERO_FULL_TEXT.length;
 
   return (
     <div className="bg-concrete text-ink font-body">
@@ -66,8 +109,14 @@ export default function Home() {
               <span className="w-2 h-2 rounded-full bg-lane inline-block" />
               RENTALS, WITHOUT THE FRONT-DESK QUEUE
             </div>
-            <h1 className="font-display uppercase font-bold text-4xl md:text-5xl leading-tight mb-4">
-              Book the right car <span className="text-orange">in minutes,</span><br />no phone calls.
+            <h1 className="font-display uppercase font-bold text-4xl md:text-5xl leading-tight mb-4 min-h-[168px] md:min-h-[128px]">
+              {line1Shown}
+              <span className="text-orange">{highlightShown}</span>
+              {highlightDone && <br />}
+              {line2Shown}
+              {isTyping && (
+                <span className="inline-block w-[3px] h-[0.9em] bg-current align-middle ml-1 animate-pulse" />
+              )}
             </h1>
             <p className="text-[#C7CBD1] max-w-md mb-7 leading-relaxed">
               Browse live availability, compare vehicles, and reserve online — no paperwork, no double bookings.
@@ -82,24 +131,24 @@ export default function Home() {
             </div>
           </div>
           <div
-  className="relative rounded-2xl overflow-hidden border border-white/10 min-h-[240px] flex items-end p-5 bg-cover bg-center"
-  style={{
-    backgroundImage: heroCar?.image
-      ? `linear-gradient(to top, rgba(20,23,28,0.85), rgba(20,23,28,0.1)), url(${heroCar.image})`
-      : undefined,
-    backgroundColor: !heroCar?.image ? "#1F232A" : undefined,
-  }}
->
-  <div className="bg-concrete text-ink rounded-lg px-4 py-3.5 shadow-2xl">
-    <div className="font-display font-semibold text-sm">
-      {heroCar ? `${heroCar.brand} ${heroCar.model}` : "Toyota Land Cruiser Prado"}
-    </div>
-    <div className="font-mono font-bold text-xl text-orange-dim">
-      KSh {heroCar ? Number(heroCar.pricePerDay).toFixed(0) : "15,000"}{" "}
-      <span className="text-xs text-gray-500 font-medium">/ day</span>
-    </div>
-  </div>
-</div>
+            className="relative rounded-2xl overflow-hidden border border-white/10 min-h-[240px] flex items-end p-5 bg-cover bg-center"
+            style={{
+              backgroundImage: heroCar?.image
+                ? `linear-gradient(to top, rgba(20,23,28,0.85), rgba(20,23,28,0.1)), url(${heroCar.image})`
+                : undefined,
+              backgroundColor: !heroCar?.image ? "#1F232A" : undefined,
+            }}
+          >
+            <div className="bg-concrete text-ink rounded-lg px-4 py-3.5 shadow-2xl">
+              <div className="font-display font-semibold text-sm">
+                {heroCar ? `${heroCar.brand} ${heroCar.model}` : "Toyota Land Cruiser Prado"}
+              </div>
+              <div className="font-mono font-bold text-xl text-orange-dim">
+                KSh {heroCar ? Number(heroCar.pricePerDay).toFixed(0) : "15,000"}{" "}
+                <span className="text-xs text-gray-500 font-medium">/ day</span>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -120,7 +169,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Available cars — now using REAL data + real photos */}
+      {/* Available cars — real data + real photos */}
       <section id="cars" className="py-14 md:py-20">
         <div className="max-w-[1180px] mx-auto px-6">
           <div className="flex items-baseline justify-between flex-wrap gap-2.5 mb-7">
