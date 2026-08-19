@@ -89,7 +89,7 @@ export default function Home() {
   const featuredCars = cars?.slice(0, 3) ?? [];
   const heroCar = cars?.find((c) => c.model.toLowerCase().includes("land cruiser")) ?? cars?.[0];
 
-  const typedCount = useTypewriter(HERO_FULL_TEXT, 40, 300);
+  const typedCount = useTypewriter(HERO_FULL_TEXT, 40, 5200);
   const line1Shown = HERO_LINE1.slice(0, Math.min(typedCount, HERO_LINE1.length));
   const highlightShown = HERO_HIGHLIGHT.slice(
     0,
