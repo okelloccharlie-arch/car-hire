@@ -8,6 +8,12 @@ import { DriveType } from "../../types";
 
 const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh — mirrors the backend constant, for preview only
 
+function toDatetimeLocalValue(date: Date) {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
 export default function CarDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -16,6 +22,7 @@ export default function CarDetails() {
   const [endDate, setEndDate] = useState("");
   const [driveType, setDriveType] = useState<DriveType>("SELF_DRIVE");
   const [error, setError] = useState("");
+  const minDateTime = toDatetimeLocalValue(new Date());
 
   const { data: car, isLoading } = useQuery({
     queryKey: ["car", id],
@@ -38,6 +45,10 @@ export default function CarDetails() {
     }
     if (!startDate || !endDate) {
       setError("Please choose both a pickup and return date & time");
+      return;
+    }
+    if (new Date(startDate) < new Date()) {
+      setError("Pickup date and time cannot be in the past");
       return;
     }
     if (new Date(endDate) <= new Date(startDate)) {
@@ -89,6 +100,7 @@ export default function CarDetails() {
                   type="datetime-local"
                   className="input mt-1"
                   value={startDate}
+                  min={minDateTime}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </label>
@@ -98,6 +110,7 @@ export default function CarDetails() {
                   type="datetime-local"
                   className="input mt-1"
                   value={endDate}
+                  min={startDate || minDateTime}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </label>
