@@ -8,21 +8,28 @@ import { DriveType } from "../../types";
 
 const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh — mirrors the backend constant, for preview only
 
-function toDatetimeLocalValue(date: Date) {
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60000);
-  return local.toISOString().slice(0, 16);
+function todayDateValue() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  const local = new Date(now.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
 export default function CarDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+
+  const [startDatePart, setStartDatePart] = useState("");
+  const [startTimePart, setStartTimePart] = useState("");
+  const [endDatePart, setEndDatePart] = useState("");
+  const [endTimePart, setEndTimePart] = useState("");
   const [driveType, setDriveType] = useState<DriveType>("SELF_DRIVE");
   const [error, setError] = useState("");
-  const minDateTime = toDatetimeLocalValue(new Date());
+
+  const minDate = todayDateValue();
+  const startDate = startDatePart && startTimePart ? `${startDatePart}T${startTimePart}` : "";
+  const endDate = endDatePart && endTimePart ? `${endDatePart}T${endTimePart}` : "";
 
   const { data: car, isLoading } = useQuery({
     queryKey: ["car", id],
@@ -93,27 +100,42 @@ export default function CarDetails() {
           </p>
 
           <form onSubmit={handleBook} className="card mt-6 space-y-3 p-4">
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm">
-                Pickup date & time
+            <div>
+              <p className="text-sm mb-1">Pickup</p>
+              <div className="grid grid-cols-2 gap-3">
                 <input
-                  type="datetime-local"
-                  className="input mt-1"
-                  value={startDate}
-                  min={minDateTime}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  type="date"
+                  className="input"
+                  value={startDatePart}
+                  min={minDate}
+                  onChange={(e) => setStartDatePart(e.target.value)}
                 />
-              </label>
-              <label className="text-sm">
-                Return date & time
                 <input
-                  type="datetime-local"
-                  className="input mt-1"
-                  value={endDate}
-                  min={startDate || minDateTime}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  type="time"
+                  className="input"
+                  value={startTimePart}
+                  onChange={(e) => setStartTimePart(e.target.value)}
                 />
-              </label>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm mb-1">Return</p>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="date"
+                  className="input"
+                  value={endDatePart}
+                  min={startDatePart || minDate}
+                  onChange={(e) => setEndDatePart(e.target.value)}
+                />
+                <input
+                  type="time"
+                  className="input"
+                  value={endTimePart}
+                  onChange={(e) => setEndTimePart(e.target.value)}
+                />
+              </div>
             </div>
 
             <div>
