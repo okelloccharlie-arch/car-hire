@@ -35,6 +35,10 @@ export const getBookings = asyncHandler(async (req: AuthRequest, res: Response) 
 export const createBooking = asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = bookingSchema.parse(req.body);
 
+  if (data.startDate < new Date()) {
+    throw new ApiError(400, "Pickup date and time cannot be in the past");
+  }
+
   if (data.endDate <= data.startDate) {
     throw new ApiError(400, "End date must be after start date");
   }
