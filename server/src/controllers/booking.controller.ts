@@ -13,6 +13,7 @@ const bookingSchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   driveType: z.enum(["SELF_DRIVE", "CHAUFFEUR"]).optional().default("SELF_DRIVE"),
+  paymentMethod: z.enum(["MPESA", "DEBIT_CARD", "CREDIT_CARD", "PESALINK"]),
 });
 
 const statusSchema = z.object({
@@ -62,17 +63,13 @@ export const createBooking = asyncHandler(async (req: AuthRequest, res: Response
   const chauffeurFee = data.driveType === "CHAUFFEUR" ? CHAUFFEUR_FEE_PER_DAY * days : 0;
   const totalPrice = baseTotal + chauffeurFee;
 
-  const booking = await prisma.booking.create({
-    data: {
-      userId: req.user!.userId,
-      carId: data.carId,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      driveType: data.driveType,
-      totalPrice,
-    },
-    include: { car: true },
-  });
+  const bookingSchema = z.object({
+  carId: z.string().uuid(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  driveType: z.enum(["SELF_DRIVE", "CHAUFFEUR"]).optional().default("SELF_DRIVE"),
+  paymentMethod: z.enum(["MPESA", "DEBIT_CARD", "CREDIT_CARD", "PESALINK"]),
+});
 
   res.status(201).json({ success: true, data: booking });
 });

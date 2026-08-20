@@ -27,6 +27,7 @@ export interface Car {
 
 export type BookingStatus = "PENDING" | "APPROVED" | "CANCELLED" | "COMPLETED";
 export type DriveType = "SELF_DRIVE" | "CHAUFFEUR";
+export type PaymentMethod = "MPESA" | "DEBIT_CARD" | "CREDIT_CARD" | "PESALINK";
 
 export interface Booking {
   id: string;

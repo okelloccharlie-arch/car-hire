@@ -5,6 +5,7 @@ import * as carService from "../../services/carService";
 import * as bookingService from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 import { DriveType } from "../../types";
+import PaymentMethodModal, { PaymentMethod } from "../../components/PaymentMethodModal";
 
 const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh — mirrors the backend constant, for preview only
 
@@ -26,6 +27,7 @@ export default function CarDetails() {
   const [endTimePart, setEndTimePart] = useState("");
   const [driveType, setDriveType] = useState<DriveType>("SELF_DRIVE");
   const [error, setError] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const minDate = todayDateValue();
   const startDate = startDatePart && startTimePart ? `${startDatePart}T${startTimePart}` : "";
@@ -38,12 +40,16 @@ export default function CarDetails() {
   });
 
   const bookingMutation = useMutation({
-    mutationFn: () => bookingService.createBooking({ carId: id!, startDate, endDate, driveType }),
+    mutationFn: (paymentMethod: PaymentMethod) =>
+      bookingService.createBooking({ carId: id!, startDate, endDate, driveType, paymentMethod }),
     onSuccess: () => navigate("/dashboard/bookings"),
-    onError: (err: any) => setError(err?.response?.data?.message || "Booking failed"),
+    onError: (err: any) => {
+      setError(err?.response?.data?.message || "Booking failed");
+      setShowPaymentModal(false);
+    },
   });
 
-  function handleBook(e: React.FormEvent) {
+  function handleBookClick(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!isAuthenticated) {
@@ -62,7 +68,7 @@ export default function CarDetails() {
       setError("Return time must be after pickup time");
       return;
     }
-    bookingMutation.mutate();
+    setShowPaymentModal(true);
   }
 
   if (isLoading) return <p className="mx-auto max-w-4xl px-4 py-10 text-navy-500">Loading…</p>;
@@ -99,7 +105,7 @@ export default function CarDetails() {
             <span className="text-base font-normal text-navy-500"> / day</span>
           </p>
 
-          <form onSubmit={handleBook} className="card mt-6 space-y-3 p-4">
+          <form onSubmit={handleBookClick} className="card mt-6 space-y-3 p-4">
             <div>
               <p className="text-sm mb-1">Pickup</p>
               <div className="grid grid-cols-2 gap-3">
@@ -188,11 +194,20 @@ export default function CarDetails() {
               className="btn-primary w-full"
               disabled={car.status !== "AVAILABLE" || bookingMutation.isPending}
             >
-              {car.status !== "AVAILABLE" ? "Not available" : bookingMutation.isPending ? "Booking…" : "Book this car"}
+              {car.status !== "AVAILABLE" ? "Not available" : "Book this car"}
             </button>
           </form>
         </div>
       </div>
+
+      {showPaymentModal && (
+        <PaymentMethodModal
+          amount={total}
+          loading={bookingMutation.isPending}
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={(method) => bookingMutation.mutate(method)}
+        />
+      )}
     </div>
   );
 }
