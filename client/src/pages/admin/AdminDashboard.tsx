@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     { label: "Customers", value: data?.totalCustomers },
     { label: "Total bookings", value: data?.totalBookings },
     { label: "Active bookings", value: data?.activeBookings },
-    { label: "Revenue", value: data ? `Ksh${Number(data.totalRevenue).toFixed(0)}` : undefined },
+    { label: "Revenue", value: data ? `Ksh ${Number(data.totalRevenue).toFixed(0)}` : undefined },
   ];
 
   return (

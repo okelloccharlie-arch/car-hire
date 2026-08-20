@@ -32,7 +32,7 @@ export default function AdminBookings() {
                 {b.car.brand} {b.car.model}
               </p>
               <p className="text-sm text-navy-500">
-                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh
+                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh 
                 {Number(b.totalPrice).toFixed(0)}
               </p>
             </div>
