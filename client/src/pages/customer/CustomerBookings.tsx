@@ -30,7 +30,7 @@ export default function CustomerBookings() {
                 {b.car.brand} {b.car.model} ({b.car.year})
               </p>
               <p className="text-sm text-navy-500">
-                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · $
+                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh
                 {Number(b.totalPrice).toFixed(0)}
               </p>
             </div>
