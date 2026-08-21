@@ -29,18 +29,22 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCars from "./pages/admin/AdminCars";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminPayments from "./pages/admin/AdminPayments";
+import { NavItem } from "./components/DashboardLayout";
+import { LayoutDashboard, CalendarCheck, UserCircle, Car, Users, Wallet } from "lucide-react";
 
-const customerNav = [
-  { to: "/dashboard", label: "Overview" },
-  { to: "/dashboard/bookings", label: "My bookings" },
-  { to: "/dashboard/profile", label: "Profile" },
+const customerNav: NavItem[] = [
+  { to: "/dashboard", label: "Overview", icon: <LayoutDashboard /> },
+  { to: "/dashboard/bookings", label: "My bookings", icon: <CalendarCheck /> },
+  { to: "/dashboard/profile", label: "Profile", icon: <UserCircle /> },
 ];
 
-const adminNav = [
-  { to: "/admin", label: "Overview" },
-  { to: "/admin/cars", label: "Cars" },
-  { to: "/admin/customers", label: "Customers" },
-  { to: "/admin/bookings", label: "Bookings" },
+const adminNav: NavItem[] = [
+  { to: "/admin", label: "Overview", icon: <LayoutDashboard /> },
+  { to: "/admin/cars", label: "Vehicle directory", icon: <Car /> },
+  { to: "/admin/customers", label: "Owners directory", icon: <Users /> },
+  { to: "/admin/bookings", label: "Bookings", icon: <CalendarCheck />, badgeKey: "pendingBookings" },
+  { to: "/admin/payments", label: "Payments", icon: <Wallet /> },
 ];
 
 export default function App() {
@@ -83,6 +87,7 @@ export default function App() {
             <Route path="/admin/cars" element={<AdminCars />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/bookings" element={<AdminBookings />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
           </Route>
         </Route>
 

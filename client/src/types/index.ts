@@ -34,9 +34,22 @@ export interface Booking {
   userId: string;
   carId: string;
   car: Car;
+  user?: { id: string; firstName: string; lastName: string; email: string };
   startDate: string;
   endDate: string;
   driveType: DriveType;
   totalPrice: number;
   status: BookingStatus;
+}
+
+export type PaymentStatus = "PAID" | "PENDING" | "FAILED";
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  booking: Booking;
+  amount: number;
+  paymentMethod: string;
+  paymentStatus: PaymentStatus;
+  createdAt: string;
 }
