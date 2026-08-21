@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as carService from "../../services/carService";
+import { Car } from "../../types";
 
 const emptyForm = {
   brand: "",
@@ -19,14 +20,21 @@ export default function AdminCars() {
   const [form, setForm] = useState(emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const createMutation = useMutation({
     mutationFn: (fd: FormData) => carService.createCar(fd),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cars"] });
-      setForm(emptyForm);
-      setImageFile(null);
-      setShowForm(false);
+      resetForm();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, fd }: { id: string; fd: FormData }) => carService.updateCar(id, fd),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cars"] });
+      resetForm();
     },
   });
 
@@ -35,9 +43,32 @@ export default function AdminCars() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cars"] }),
   });
 
+  function resetForm() {
+    setForm(emptyForm);
+    setImageFile(null);
+    setShowForm(false);
+    setEditingId(null);
+  }
+
   function update(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [field]: e.target.value }));
+  }
+
+  function startEdit(car: Car) {
+    setForm({
+      brand: car.brand,
+      model: car.model,
+      year: String(car.year),
+      pricePerDay: String(car.pricePerDay),
+      transmission: car.transmission,
+      fuelType: car.fuelType,
+      seats: String(car.seats),
+      status: car.status,
+    });
+    setImageFile(null);
+    setEditingId(car.id);
+    setShowForm(true);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -45,20 +76,41 @@ export default function AdminCars() {
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
     if (imageFile) fd.append("image", imageFile);
-    createMutation.mutate(fd);
+
+    if (editingId) {
+      updateMutation.mutate({ id: editingId, fd });
+    } else {
+      createMutation.mutate(fd);
+    }
   }
+
+  const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-navy-900">Manage cars</h1>
-        <button className="btn-primary" onClick={() => setShowForm((s) => !s)}>
+        <button
+          className="btn-primary"
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+            } else {
+              setShowForm(true);
+            }
+          }}
+        >
           {showForm ? "Cancel" : "Add car"}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="card mt-4 grid grid-cols-2 gap-3 p-5">
+          {editingId && (
+            <p className="col-span-2 text-sm font-medium text-amber-600">
+              Editing {form.brand} {form.model} — leave the image field empty to keep the current photo.
+            </p>
+          )}
           <input className="input" placeholder="Brand" value={form.brand} onChange={update("brand")} required />
           <input className="input" placeholder="Model" value={form.model} onChange={update("model")} required />
           <input className="input" type="number" placeholder="Year" value={form.year} onChange={update("year")} required />
@@ -92,14 +144,14 @@ export default function AdminCars() {
             accept="image/*"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
           />
-          <button type="submit" className="btn-primary col-span-2" disabled={createMutation.isPending}>
-            {createMutation.isPending ? "Saving…" : "Save car"}
+          <button type="submit" className="btn-primary col-span-2" disabled={isSaving}>
+            {isSaving ? "Saving…" : editingId ? "Update car" : "Save car"}
           </button>
         </form>
       )}
 
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
+        <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-navy-100 text-left text-navy-500">
               <th className="py-2">Car</th>
@@ -125,7 +177,10 @@ export default function AdminCars() {
                 <td className="py-3 text-navy-500">
                   {car.rentedAt ? new Date(car.rentedAt).toLocaleString() : "—"}
                 </td>
-                <td className="py-3 text-right">
+                <td className="py-3 text-right space-x-3">
+                  <button className="font-medium text-amber-600 hover:text-amber-700" onClick={() => startEdit(car)}>
+                    Edit
+                  </button>
                   <button
                     className="text-rose-600 hover:text-rose-700"
                     onClick={() => deleteMutation.mutate(car.id)}
