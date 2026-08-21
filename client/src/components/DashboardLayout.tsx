@@ -1,8 +1,8 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Menu, X, Settings, HelpCircle, Bell, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { usePendingBookingsCount } from "../hooks/usePendingBookingsCount";
+import { useNotifications } from "../hooks/useNotifications";
 
 export interface NavItem {
   to: string;
@@ -14,10 +14,25 @@ export interface NavItem {
 export default function DashboardLayout({ items, heading }: { items: NavItem[]; heading: string }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const pendingCount = usePendingBookingsCount();
+  const { items: notifications, count: notificationCount, isAdmin } = useNotifications();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
+  const settingsPath = isAdmin ? "/admin/profile" : "/dashboard/profile";
+  const notificationsViewAllPath = isAdmin ? "/admin/bookings" : "/dashboard/bookings";
+
+  // Close the notifications dropdown when clicking anywhere outside it
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const sidebar = (
     <>
@@ -28,7 +43,7 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {items.map((item) => {
-          const badgeCount = item.badgeKey === "pendingBookings" ? pendingCount : 0;
+          const badgeCount = item.badgeKey === "pendingBookings" ? notificationCount : 0;
           return (
             <NavLink
               key={item.to}
@@ -57,27 +72,71 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
 
       <div className="mt-auto px-3 pb-3">
         <div className="flex flex-col gap-1 border-t border-navy-100 pt-3">
-          <button className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900">
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              navigate(settingsPath);
+            }}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900"
+          >
             <Settings className="h-[18px] w-[18px]" />
             Settings
           </button>
-          <button className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900">
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              navigate("/faq");
+            }}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900"
+          >
             <HelpCircle className="h-[18px] w-[18px]" />
             Help and support
           </button>
-          <NavLink
-            to={items.find((i) => i.badgeKey === "pendingBookings")?.to ?? items[0].to}
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900"
-          >
-            <span className="relative">
-              <Bell className="h-[18px] w-[18px]" />
-              {pendingCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-rose-500" />
-              )}
-            </span>
-            Notifications
-          </NavLink>
+
+          {/* Notifications dropdown */}
+          <div ref={notifRef} className="relative">
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-navy-500 hover:bg-navy-50 hover:text-navy-900"
+            >
+              <span className="relative">
+                <Bell className="h-[18px] w-[18px]" />
+                {notificationCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-rose-500" />
+                )}
+              </span>
+              Notifications
+            </button>
+
+            {notifOpen && (
+              <div className="absolute bottom-full left-0 z-50 mb-2 w-80 overflow-hidden rounded-xl border border-navy-100 bg-white shadow-lg">
+                <div className="border-b border-navy-100 px-4 py-3">
+                  <p className="text-sm font-semibold text-navy-900">Notifications</p>
+                </div>
+                <div className="max-h-72 overflow-y-auto">
+                  {notifications.length === 0 && (
+                    <p className="px-4 py-6 text-center text-sm text-navy-400">You're all caught up.</p>
+                  )}
+                  {notifications.map((n) => (
+                    <div key={n.id} className="border-b border-navy-50 px-4 py-3 last:border-0 hover:bg-navy-50/60">
+                      <p className="text-sm font-medium text-navy-900">{n.title}</p>
+                      <p className="text-xs text-navy-400">{n.subtitle}</p>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setNotifOpen(false);
+                    setMobileOpen(false);
+                    navigate(notificationsViewAllPath);
+                  }}
+                  className="block w-full border-t border-navy-100 px-4 py-2.5 text-center text-xs font-medium text-amber-600 hover:bg-navy-50"
+                >
+                  View all
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mt-2 flex items-center gap-3 rounded-xl border border-navy-100 bg-navy-50/50 px-3 py-2.5">

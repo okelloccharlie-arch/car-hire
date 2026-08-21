@@ -30,6 +30,7 @@ import AdminCars from "./pages/admin/AdminCars";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminProfile from "./pages/admin/AdminProfile";
 import { NavItem } from "./components/DashboardLayout";
 import { LayoutDashboard, CalendarCheck, UserCircle, Car, Users, Wallet } from "lucide-react";
 
@@ -88,6 +89,7 @@ export default function App() {
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/bookings" element={<AdminBookings />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
           </Route>
         </Route>
 
