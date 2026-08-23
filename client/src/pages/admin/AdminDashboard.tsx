@@ -13,7 +13,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { Car, CarFront, Wrench, Users, Wallet } from "lucide-react";
+import { Car, CarFront, Wrench, Users, Wallet, AlertTriangle } from "lucide-react";
 import api from "../../services/api";
 import * as bookingService from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
@@ -40,6 +40,7 @@ interface Summary {
   totalCustomers: number;
   totalBookings: number;
   activeBookings: number;
+  overdueBookings: number;
   totalRevenue: number;
   dailyStats: DailyStat[];
   topCars: TopCar[];
@@ -92,6 +93,17 @@ export default function AdminDashboard() {
           <option value="90">Last 90 Days</option>
         </select>
       </div>
+
+      {data && data.overdueBookings > 0 && (
+        <Link
+          to="/admin/bookings"
+          className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 hover:bg-rose-100"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          {data.overdueBookings} vehicle{data.overdueBookings > 1 ? "s are" : " is"} overdue for return — review
+          now
+        </Link>
+      )}
 
       {/* Stat cards */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
@@ -182,7 +194,7 @@ export default function AdminDashboard() {
             </Link>
           </div>
           <div className="mt-3 space-y-3">
-            {data?.topCars?.map((c) => (
+            {data?.topCars.map((c) => (
               <div key={c.carId} className="flex items-center gap-3">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-navy-50">
                   {c.image ? (
@@ -202,7 +214,7 @@ export default function AdminDashboard() {
                 <span className="font-display text-sm font-semibold text-navy-900">{c.bookings}</span>
               </div>
             ))}
-            {data && (data.topCars?.length ?? 0) === 0 && <p className="text-sm text-navy-400">No bookings yet.</p>}
+            {data && data.topCars.length === 0 && <p className="text-sm text-navy-400">No bookings yet.</p>}
           </div>
         </div>
 

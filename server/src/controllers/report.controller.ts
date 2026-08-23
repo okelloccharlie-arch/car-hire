@@ -13,6 +13,7 @@ export const getSummary = asyncHandler(async (_req: AuthRequest, res: Response) 
     totalCustomers,
     totalBookings,
     activeBookings,
+    overdueBookings,
     revenue,
   ] = await Promise.all([
     prisma.car.count(),
@@ -22,6 +23,7 @@ export const getSummary = asyncHandler(async (_req: AuthRequest, res: Response) 
     prisma.user.count({ where: { role: "CUSTOMER" } }),
     prisma.booking.count(),
     prisma.booking.count({ where: { status: "APPROVED" } }),
+    prisma.booking.count({ where: { status: "APPROVED", endDate: { lt: new Date() } } }),
     prisma.payment.aggregate({ _sum: { amount: true }, where: { paymentStatus: "PAID" } }),
   ]);
 
@@ -88,6 +90,7 @@ export const getSummary = asyncHandler(async (_req: AuthRequest, res: Response) 
       totalCustomers,
       totalBookings,
       activeBookings,
+      overdueBookings,
       totalRevenue: revenue._sum.amount ?? 0,
       dailyStats: days,
       topCars,
