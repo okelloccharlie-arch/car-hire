@@ -157,6 +157,18 @@ export const getBreakdown = asyncHandler(async (_req: AuthRequest, res: Response
     };
   });
 
+  // New customer signups per month, last 12 months
+  const newCustomers = await prisma.user.findMany({
+    where: { role: "CUSTOMER", createdAt: { gte: since } },
+    select: { createdAt: true },
+  });
+  const customerGrowth = months.map((m) => ({ month: m.month, label: m.label, newCustomers: 0 }));
+  const byMonthCustomers = Object.fromEntries(customerGrowth.map((m) => [m.month, m]));
+  newCustomers.forEach((c) => {
+    const key = monthKey(new Date(c.createdAt));
+    if (byMonthCustomers[key]) byMonthCustomers[key].newCustomers += 1;
+  });
+
   // Booking status split
   const statusGroups = await prisma.booking.groupBy({ by: ["status"], _count: { status: true } });
   const statusBreakdown = statusGroups.map((s) => ({ status: s.status, count: s._count.status }));
@@ -175,6 +187,6 @@ export const getBreakdown = asyncHandler(async (_req: AuthRequest, res: Response
 
   res.json({
     success: true,
-    data: { monthlyRevenue: months, popularCars, statusBreakdown, driveTypeBreakdown },
+    data: { monthlyRevenue: months, popularCars, statusBreakdown, driveTypeBreakdown, customerGrowth },
   });
 });

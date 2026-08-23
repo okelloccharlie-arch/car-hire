@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   BarChart,
   Bar,
+  Line,
+  ComposedChart,
   PieChart,
   Pie,
   Cell,
@@ -41,11 +43,18 @@ interface DriveTypeBreakdown {
   revenue: number;
 }
 
+interface CustomerGrowth {
+  month: string;
+  label: string;
+  newCustomers: number;
+}
+
 interface Breakdown {
   monthlyRevenue: MonthlyRevenue[];
   popularCars: PopularCar[];
   statusBreakdown: StatusBreakdown[];
   driveTypeBreakdown: DriveTypeBreakdown[];
+  customerGrowth: CustomerGrowth[];
 }
 
 const statusColors: Record<string, string> = {
@@ -84,6 +93,13 @@ export default function AdminReports() {
     const rows: (string | number)[][] = [["Month", "Bookings", "Revenue (Ksh)"]];
     data.monthlyRevenue.forEach((m) => rows.push([m.label, m.bookings, m.revenue]));
     downloadCsv("monthly-revenue.csv", rows);
+  }
+
+  function exportCustomerGrowth() {
+    if (!data) return;
+    const rows: (string | number)[][] = [["Month", "New Customers"]];
+    data.customerGrowth.forEach((m) => rows.push([m.label, m.newCustomers]));
+    downloadCsv("customer-growth.csv", rows);
   }
 
   const totalRevenue12mo = data?.monthlyRevenue.reduce((sum, m) => sum + m.revenue, 0) ?? 0;
@@ -169,6 +185,28 @@ export default function AdminReports() {
               </span>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Customer growth */}
+      <div className="mt-4 card p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-navy-900">New Customers by Month</h2>
+          <button onClick={exportCustomerGrowth} className="flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:underline">
+            <Download className="h-3.5 w-3.5" /> Export CSV
+          </button>
+        </div>
+        <div className="mt-2 h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={data?.customerGrowth ?? []} margin={{ left: -20, right: 10 }}>
+              <CartesianGrid vertical={false} stroke="#f0f4fa" />
+              <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#8296b8" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: "#8296b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip formatter={(value) => [`${value} new customers`, "New customers"]} />
+              <Bar dataKey="newCustomers" fill="#2f4a73" radius={[4, 4, 0, 0]} barSize={22} />
+              <Line type="monotone" dataKey="newCustomers" stroke="#e8892a" strokeWidth={2} dot={{ r: 3 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
