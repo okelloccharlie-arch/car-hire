@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Download } from "lucide-react";
 import * as bookingService from "../../services/bookingService";
 import { Booking, BookingStatus } from "../../types";
 import { formatMoney } from "../../utils/format";
+import { downloadBookingReceipt } from "../../utils/receipt";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700",
@@ -126,6 +127,14 @@ export default function AdminBookings() {
                 <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[b.status]}`}>
                   {overdue ? "OVERDUE" : b.status}
                 </span>
+                {(b.status === "APPROVED" || b.status === "COMPLETED") && (
+                  <button
+                    className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:underline"
+                    onClick={() => downloadBookingReceipt(b)}
+                  >
+                    <Download className="h-4 w-4" /> Receipt
+                  </button>
+                )}
                 {b.status === "PENDING" && (
                   <button
                     className="btn-primary"

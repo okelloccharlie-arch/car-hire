@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Download } from "lucide-react";
 import * as bookingService from "../../services/bookingService";
 import { formatMoney } from "../../utils/format";
+import { downloadBookingReceipt } from "../../utils/receipt";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700",
@@ -37,6 +39,14 @@ export default function CustomerBookings() {
             </div>
             <div className="flex items-center gap-3">
               <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[b.status]}`}>{b.status}</span>
+              {(b.status === "APPROVED" || b.status === "COMPLETED") && (
+                <button
+                  className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:underline"
+                  onClick={() => downloadBookingReceipt(b)}
+                >
+                  <Download className="h-4 w-4" /> Receipt
+                </button>
+              )}
               {(b.status === "PENDING" || b.status === "APPROVED") && (
                 <button
                   className="btn-secondary"
