@@ -97,3 +97,84 @@ export const getSummary = asyncHandler(async (_req: AuthRequest, res: Response) 
     },
   });
 });
+
+// GET /api/reports/breakdown — revenue by month, popular cars, status & drive-type splits
+export const getBreakdown = asyncHandler(async (_req: AuthRequest, res: Response) => {
+  // Revenue + bookings for the last 12 months, bucketed by month
+  const since = new Date();
+  since.setMonth(since.getMonth() - 11);
+  since.setDate(1);
+  since.setHours(0, 0, 0, 0);
+
+  const [recentBookings, recentPayments] = await Promise.all([
+    prisma.booking.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }),
+    prisma.payment.findMany({
+      where: { createdAt: { gte: since }, paymentStatus: "PAID" },
+      select: { createdAt: true, amount: true },
+    }),
+  ]);
+
+  const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const months: { month: string; label: string; bookings: number; revenue: number }[] = [];
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(since);
+    d.setMonth(since.getMonth() + i);
+    months.push({
+      month: monthKey(d),
+      label: d.toLocaleDateString(undefined, { month: "short", year: "2-digit" }),
+      bookings: 0,
+      revenue: 0,
+    });
+  }
+  const byMonth = Object.fromEntries(months.map((m) => [m.month, m]));
+  recentBookings.forEach((b) => {
+    const key = monthKey(new Date(b.createdAt));
+    if (byMonth[key]) byMonth[key].bookings += 1;
+  });
+  recentPayments.forEach((p) => {
+    const key = monthKey(new Date(p.createdAt));
+    if (byMonth[key]) byMonth[key].revenue += Number(p.amount);
+  });
+
+  // Most popular cars — ranked by number of bookings, with total revenue booked
+  const carGroups = await prisma.booking.groupBy({
+    by: ["carId"],
+    _count: { carId: true },
+    _sum: { totalPrice: true },
+    orderBy: { _count: { carId: "desc" } },
+    take: 10,
+  });
+  const carIds = carGroups.map((g) => g.carId);
+  const carRecords = await prisma.car.findMany({ where: { id: { in: carIds } } });
+  const popularCars = carGroups.map((g) => {
+    const car = carRecords.find((c) => c.id === g.carId);
+    return {
+      carId: g.carId,
+      brand: car?.brand ?? "Unknown",
+      model: car?.model ?? "",
+      bookings: g._count.carId,
+      revenue: Number(g._sum.totalPrice ?? 0),
+    };
+  });
+
+  // Booking status split
+  const statusGroups = await prisma.booking.groupBy({ by: ["status"], _count: { status: true } });
+  const statusBreakdown = statusGroups.map((s) => ({ status: s.status, count: s._count.status }));
+
+  // Self-drive vs chauffeur split
+  const driveGroups = await prisma.booking.groupBy({
+    by: ["driveType"],
+    _count: { driveType: true },
+    _sum: { totalPrice: true },
+  });
+  const driveTypeBreakdown = driveGroups.map((d) => ({
+    driveType: d.driveType,
+    count: d._count.driveType,
+    revenue: Number(d._sum.totalPrice ?? 0),
+  }));
+
+  res.json({
+    success: true,
+    data: { monthlyRevenue: months, popularCars, statusBreakdown, driveTypeBreakdown },
+  });
+});

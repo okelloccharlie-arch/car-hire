@@ -31,8 +31,9 @@ import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminProfile from "./pages/admin/AdminProfile";
+import AdminReports from "./pages/admin/AdminReports";
 import { NavItem } from "./components/DashboardLayout";
-import { LayoutDashboard, CalendarCheck, UserCircle, Car, Users, Wallet } from "lucide-react";
+import { LayoutDashboard, CalendarCheck, UserCircle, Car, Users, Wallet, BarChart3 } from "lucide-react";
 
 const customerNav: NavItem[] = [
   { to: "/dashboard", label: "Overview", icon: <LayoutDashboard /> },
@@ -46,6 +47,7 @@ const adminNav: NavItem[] = [
   { to: "/admin/customers", label: "Owners directory", icon: <Users /> },
   { to: "/admin/bookings", label: "Bookings", icon: <CalendarCheck />, badgeKey: "pendingBookings" },
   { to: "/admin/payments", label: "Payments", icon: <Wallet /> },
+  { to: "/admin/reports", label: "Reports", icon: <BarChart3 /> },
 ];
 
 export default function App() {
@@ -90,6 +92,7 @@ export default function App() {
             <Route path="/admin/bookings" element={<AdminBookings />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/profile" element={<AdminProfile />} />
+            <Route path="/admin/reports" element={<AdminReports />} />
           </Route>
         </Route>
 
