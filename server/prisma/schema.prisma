@@ -50,6 +50,7 @@ model Car {
   status       CarStatus @default(AVAILABLE)
   rentedAt     DateTime?
   bookings     Booking[]
+  reviews      Review[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -68,10 +69,26 @@ model Booking {
   totalPrice Decimal       @db.Decimal(10, 2)
   status     BookingStatus @default(PENDING)
   payment    Payment?
+  review     Review?
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
   @@map("bookings")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  carId     String
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
 }
 
 model Payment {
@@ -94,6 +111,7 @@ model User {
   password          String
   role              Role      @default(CUSTOMER)
   bookings          Booking[]
+  reviews           Review[]
   resetToken        String?
   resetTokenExpiry  DateTime?
   createdAt         DateTime  @default(now())

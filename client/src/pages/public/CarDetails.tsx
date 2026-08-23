@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import * as carService from "../../services/carService";
 import * as bookingService from "../../services/bookingService";
+import * as reviewService from "../../services/reviewService";
 import { useAuth } from "../../context/AuthContext";
 import { DriveType } from "../../types";
 import PaymentMethodModal, { PaymentMethod } from "../../components/PaymentMethodModal";
+import StarRating from "../../components/StarRating";
 import { formatMoney } from "../../utils/format";
 
 const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh — mirrors the backend constant, for preview only
@@ -37,6 +39,12 @@ export default function CarDetails() {
   const { data: car, isLoading } = useQuery({
     queryKey: ["car", id],
     queryFn: () => carService.getCarById(id!),
+    enabled: !!id,
+  });
+
+  const { data: reviewData } = useQuery({
+    queryKey: ["reviews", "car", id],
+    queryFn: () => reviewService.getCarReviews(id!),
     enabled: !!id,
   });
 
@@ -101,6 +109,14 @@ export default function CarDetails() {
           <p className="mt-1 text-navy-500">
             {car.transmission} · {car.fuelType} · {car.seats} seats
           </p>
+          {reviewData && reviewData.count > 0 && (
+            <div className="mt-2 flex items-center gap-2">
+              <StarRating value={reviewData.average} size={16} />
+              <span className="text-sm text-navy-500">
+                {reviewData.average.toFixed(1)} ({reviewData.count} review{reviewData.count > 1 ? "s" : ""})
+              </span>
+            </div>
+          )}
           <p className="mt-4 font-display text-3xl font-bold text-navy-900">
             KSh {formatMoney(car.pricePerDay)}
             <span className="text-base font-normal text-navy-500"> / day</span>
@@ -209,6 +225,32 @@ export default function CarDetails() {
           onConfirm={(method) => bookingMutation.mutate(method)}
         />
       )}
+
+      {/* Reviews */}
+      <div className="mt-12">
+        <h2 className="font-display text-xl font-bold text-navy-900">
+          Reviews {reviewData && reviewData.count > 0 ? `(${reviewData.count})` : ""}
+        </h2>
+        <div className="mt-4 space-y-4">
+          {reviewData?.reviews.map((r) => (
+            <div key={r.id} className="card p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-medium text-navy-900">
+                  {r.user ? `${r.user.firstName} ${r.user.lastName}` : "Customer"}
+                </p>
+                <span className="text-xs text-navy-400">{new Date(r.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div className="mt-1">
+                <StarRating value={r.rating} size={14} />
+              </div>
+              {r.comment && <p className="mt-2 text-sm text-navy-600">{r.comment}</p>}
+            </div>
+          ))}
+          {reviewData && reviewData.count === 0 && (
+            <p className="text-navy-500">No reviews yet — be the first to rent and review this car.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
