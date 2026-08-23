@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Car } from "../types";
+import { formatMoney } from "../utils/format";
 
 const statusStyles: Record<Car["status"], string> = {
   AVAILABLE: "bg-emerald-50 text-emerald-700",
@@ -30,7 +31,7 @@ export default function CarCard({ car }: { car: Car }) {
           {car.year} · {car.transmission} · {car.fuelType} · {car.seats} seats
         </p>
         <p className="mt-3 font-display text-lg font-bold text-navy-900">
-          KSh {Number(car.pricePerDay).toFixed(0)}
+          KSh {formatMoney(car.pricePerDay)}
           <span className="text-sm font-normal text-navy-500"> / day</span>
         </p>
       </div>

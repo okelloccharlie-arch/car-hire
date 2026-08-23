@@ -6,6 +6,7 @@ import * as bookingService from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 import { DriveType } from "../../types";
 import PaymentMethodModal, { PaymentMethod } from "../../components/PaymentMethodModal";
+import { formatMoney } from "../../utils/format";
 
 const CHAUFFEUR_FEE_PER_DAY = 2000; // KSh — mirrors the backend constant, for preview only
 
@@ -101,7 +102,7 @@ export default function CarDetails() {
             {car.transmission} · {car.fuelType} · {car.seats} seats
           </p>
           <p className="mt-4 font-display text-3xl font-bold text-navy-900">
-            KSh {Number(car.pricePerDay).toFixed(0)}
+            KSh {formatMoney(car.pricePerDay)}
             <span className="text-base font-normal text-navy-500"> / day</span>
           </p>
 
@@ -177,14 +178,14 @@ export default function CarDetails() {
             {days > 0 && (
               <div className="text-sm text-navy-600 space-y-0.5">
                 <p>
-                  {days} day{days > 1 ? "s" : ""} × KSh {Number(car.pricePerDay).toFixed(0)} = KSh {baseTotal.toFixed(0)}
+                  {days} day{days > 1 ? "s" : ""} × KSh {formatMoney(car.pricePerDay)} = KSh {formatMoney(baseTotal)}
                 </p>
                 {chauffeurFee > 0 && (
                   <p>
-                    Chauffeur: {days} day{days > 1 ? "s" : ""} × KSh {CHAUFFEUR_FEE_PER_DAY.toLocaleString()} = KSh {chauffeurFee.toFixed(0)}
+                    Chauffeur: {days} day{days > 1 ? "s" : ""} × KSh {formatMoney(CHAUFFEUR_FEE_PER_DAY)} = KSh {formatMoney(chauffeurFee)}
                   </p>
                 )}
-                <p className="font-semibold text-navy-900 pt-1">Total: KSh {total.toFixed(0)}</p>
+                <p className="font-semibold text-navy-900 pt-1">Total: KSh {formatMoney(total)}</p>
               </div>
             )}
 

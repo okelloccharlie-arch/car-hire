@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import * as carService from "../../services/carService";
 import CarCard from "../../components/CarCard";
+import { formatMoney } from "../../utils/format";
 
 function useCountUp(target: number) {
   const [value, setValue] = useState(0);
@@ -144,7 +145,7 @@ export default function Home() {
                 {heroCar ? `${heroCar.brand} ${heroCar.model}` : "Toyota Land Cruiser Prado"}
               </div>
               <div className="font-mono font-bold text-xl text-orange-dim">
-                KSh {heroCar ? Number(heroCar.pricePerDay).toFixed(0) : "15,000"}{" "}
+                KSh {heroCar ? formatMoney(heroCar.pricePerDay) : "15,000"}{" "}
                 <span className="text-xs text-gray-500 font-medium">/ day</span>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { CalendarCheck, Wallet, ArrowRight } from "lucide-react";
+import { formatMoney } from "../../utils/format";
 import * as bookingService from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 
@@ -50,7 +51,7 @@ export default function CustomerDashboard() {
             <Wallet className="h-5 w-5 text-amber-500" />
           </div>
           <p className="mt-2 font-display text-3xl font-bold text-navy-900">
-            {isLoading ? "…" : `Ksh ${totalSpend.toFixed(0)}`}
+            {isLoading ? "…" : `Ksh ${formatMoney(totalSpend)}`}
           </p>
         </div>
         <Link to="/cars" className="card flex flex-col justify-center p-5 hover:shadow-md">

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import * as bookingService from "../../services/bookingService";
 import { Booking, BookingStatus } from "../../types";
+import { formatMoney } from "../../utils/format";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700",
@@ -113,7 +114,7 @@ export default function AdminBookings() {
                 </p>
                 <p className="text-sm text-navy-500">
                   {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh{" "}
-                  {Number(b.totalPrice).toFixed(0)}
+                  {formatMoney(b.totalPrice)}
                 </p>
                 {overdue && (
                   <p className="mt-1 text-sm font-medium text-rose-600">

@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { Car, CarFront, Wrench, Users, Wallet, AlertTriangle } from "lucide-react";
 import api from "../../services/api";
+import { formatMoney } from "../../utils/format";
 import * as bookingService from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
     { label: "Rented Today", value: data?.rentedCars, icon: CarFront },
     { label: "Under Maintenance", value: data?.maintenanceCars, icon: Wrench },
     { label: "Total Customers", value: data?.totalCustomers, icon: Users },
-    { label: "Revenue", value: data ? `Ksh ${Number(data.totalRevenue).toFixed(0)}` : undefined, icon: Wallet },
+    { label: "Revenue", value: data ? `Ksh ${formatMoney(data.totalRevenue)}` : undefined, icon: Wallet },
   ];
 
   const donutData = data
@@ -160,7 +161,13 @@ export default function AdminDashboard() {
               <ComposedChart data={chartData} margin={{ left: -20, right: 10 }}>
                 <CartesianGrid vertical={false} stroke="#f0f4fa" />
                 <XAxis dataKey="day" tick={{ fontSize: 12, fill: "#8296b8" }} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" tick={{ fontSize: 12, fill: "#8296b8" }} axisLine={false} tickLine={false} />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fontSize: 12, fill: "#8296b8" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatMoney(v)}
+                />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
@@ -168,7 +175,7 @@ export default function AdminDashboard() {
                   axisLine={false}
                   tickLine={false}
                 />
-                <Tooltip />
+                <Tooltip formatter={(value, name) => (name === "Revenue (Ksh)" ? [`Ksh ${formatMoney(value as number)}`, name] : [value, name])} />
                 <Bar yAxisId="left" dataKey="Revenue (Ksh)" fill="#f3a13a" radius={[4, 4, 0, 0]} barSize={22} />
                 <Line
                   yAxisId="right"

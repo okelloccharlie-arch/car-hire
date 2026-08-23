@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as paymentService from "../../services/paymentService";
 import { PaymentStatus } from "../../types";
+import { formatMoney } from "../../utils/format";
 
 const statusStyles: Record<PaymentStatus, string> = {
   PAID: "bg-emerald-50 text-emerald-700",
@@ -62,7 +63,7 @@ export default function AdminPayments() {
         <div className="card p-5">
           <p className="text-sm text-navy-500">Confirmed revenue</p>
           <p className="mt-1 font-display text-3xl font-bold text-navy-900">
-            {isLoading ? "…" : `Ksh ${totals.paid.toFixed(0)}`}
+            {isLoading ? "…" : `Ksh ${formatMoney(totals.paid)}`}
           </p>
         </div>
         <div className="card p-5">
@@ -120,7 +121,7 @@ export default function AdminPayments() {
                   {p.booking.car.brand} {p.booking.car.model}
                 </td>
                 <td className="py-3">{methodLabels[p.paymentMethod] ?? p.paymentMethod}</td>
-                <td className="py-3">Ksh {Number(p.amount).toFixed(0)}</td>
+                <td className="py-3">Ksh {formatMoney(p.amount)}</td>
                 <td className="py-3 text-navy-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                 <td className="py-3">
                   <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[p.paymentStatus]}`}>

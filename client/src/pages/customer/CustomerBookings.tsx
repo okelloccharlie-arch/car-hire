@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as bookingService from "../../services/bookingService";
+import { formatMoney } from "../../utils/format";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700",
@@ -30,8 +31,8 @@ export default function CustomerBookings() {
                 {b.car.brand} {b.car.model} ({b.car.year})
               </p>
               <p className="text-sm text-navy-500">
-                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh 
-                {Number(b.totalPrice).toFixed(0)}
+                {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()} · Ksh{" "}
+                {formatMoney(b.totalPrice)}
               </p>
             </div>
             <div className="flex items-center gap-3">

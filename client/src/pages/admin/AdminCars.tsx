@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as carService from "../../services/carService";
 import { Car } from "../../types";
+import { formatMoney } from "../../utils/format";
 
 const emptyForm = {
   brand: "",
@@ -172,7 +173,7 @@ export default function AdminCars() {
                 <td className="py-3 font-medium text-navy-900">
                   {car.brand} {car.model} ({car.year})
                 </td>
-                <td className="py-3">KSh {Number(car.pricePerDay).toFixed(0)}</td>
+                <td className="py-3">KSh {formatMoney(car.pricePerDay)}</td>
                 <td className="py-3">{car.status}</td>
                 <td className="py-3 text-navy-500">
                   {car.rentedAt ? new Date(car.rentedAt).toLocaleString() : "—"}
