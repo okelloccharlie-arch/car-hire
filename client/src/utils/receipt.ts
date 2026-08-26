@@ -66,7 +66,7 @@ export async function downloadBookingReceipt(booking: Booking) {
   doc.setFontSize(10);
   doc.setTextColor(...GRAY);
   doc.text("Booking Receipt", pageWidth - 20, y - 6, { align: "right" });
-  doc.text(`Issued ${new Date().toLocaleDateString()}`, pageWidth - 20, y, { align: "right" });
+  doc.text(`Issued ${new Date().toLocaleString()}`, pageWidth - 20, y, { align: "right" });
 
   y += 6;
   doc.setDrawColor(...AMBER);

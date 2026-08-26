@@ -59,3 +59,22 @@ export async function sendPasswordResetEmail(params: { to: string; firstName: st
     `,
   });
 }
+
+export async function sendContactMessageEmail(params: { name: string; email: string; message: string }) {
+  const { name, email, message } = params;
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@carrental.com";
+
+  await resend.emails.send({
+    from: "Car Hire <onboarding@resend.dev>",
+    to: adminEmail,
+    replyTo: email,
+    subject: `New contact message from ${name}`,
+    html: `
+      <p>You've received a new message from the Contact Us page.</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Message:</strong></p>
+      <p>${message.replace(/\n/g, "<br>")}</p>
+    `,
+  });
+}
