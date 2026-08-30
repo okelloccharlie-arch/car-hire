@@ -91,6 +91,17 @@ model Review {
   @@map("reviews")
 }
 
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
 model Payment {
   id            String        @id @default(uuid())
   bookingId     String        @unique

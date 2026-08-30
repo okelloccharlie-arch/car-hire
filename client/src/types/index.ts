@@ -62,6 +62,15 @@ export interface Review {
   car?: Car;
 }
 
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export type PaymentStatus = "PAID" | "PENDING" | "FAILED";
 
 export interface Payment {

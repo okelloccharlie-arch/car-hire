@@ -8,20 +8,31 @@ export interface NavItem {
   to: string;
   label: string;
   icon: ReactNode;
-  badgeKey?: "pendingBookings";
+  badgeKey?: "pendingBookings" | "unreadMessages";
 }
 
 export default function DashboardLayout({ items, heading }: { items: NavItem[]; heading: string }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { items: notifications, count: notificationCount, isAdmin } = useNotifications();
+  const {
+    items: notifications,
+    count: notificationCount,
+    isAdmin,
+    pendingBookingsCount,
+    unreadMessagesCount,
+  } = useNotifications();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
   const settingsPath = isAdmin ? "/admin/profile" : "/dashboard/profile";
-  const notificationsViewAllPath = isAdmin ? "/admin/bookings" : "/dashboard/bookings";
+
+  function badgeCountFor(key?: "pendingBookings" | "unreadMessages") {
+    if (key === "pendingBookings") return pendingBookingsCount;
+    if (key === "unreadMessages") return unreadMessagesCount;
+    return 0;
+  }
 
   // Close the notifications dropdown when clicking anywhere outside it
   useEffect(() => {
@@ -43,7 +54,7 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {items.map((item) => {
-          const badgeCount = item.badgeKey === "pendingBookings" ? notificationCount : 0;
+          const badgeCount = badgeCountFor(item.badgeKey);
           return (
             <NavLink
               key={item.to}
@@ -118,22 +129,20 @@ export default function DashboardLayout({ items, heading }: { items: NavItem[]; 
                     <p className="px-4 py-6 text-center text-sm text-navy-400">You're all caught up.</p>
                   )}
                   {notifications.map((n) => (
-                    <div key={n.id} className="border-b border-navy-50 px-4 py-3 last:border-0 hover:bg-navy-50/60">
+                    <button
+                      key={n.id}
+                      onClick={() => {
+                        setNotifOpen(false);
+                        setMobileOpen(false);
+                        navigate(n.to);
+                      }}
+                      className="block w-full border-b border-navy-50 px-4 py-3 text-left last:border-0 hover:bg-navy-50/60"
+                    >
                       <p className="text-sm font-medium text-navy-900">{n.title}</p>
                       <p className="text-xs text-navy-400">{n.subtitle}</p>
-                    </div>
+                    </button>
                   ))}
                 </div>
-                <button
-                  onClick={() => {
-                    setNotifOpen(false);
-                    setMobileOpen(false);
-                    navigate(notificationsViewAllPath);
-                  }}
-                  className="block w-full border-t border-navy-100 px-4 py-2.5 text-center text-xs font-medium text-amber-600 hover:bg-navy-50"
-                >
-                  View all
-                </button>
               </div>
             )}
           </div>
